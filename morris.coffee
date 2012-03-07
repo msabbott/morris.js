@@ -298,6 +298,9 @@ class Morris.Line
     n = s.match /^(\d+)-(\d+)$/
     o = s.match /^(\d+)-(\d+)-(\d+)$/
     p = s.match /^(\d+) W(\d+)$/
+    t1 = s.match /^(\d+):(\d+):(\d+).(\d*)$/
+    t2 = s.match /^(\d+):(\d+):(\d+)$/
+    t3 = s.match /^(\d+):(\d+)$/
     if m
       parseInt(m[1], 10) + (parseInt(m[2], 10) * 3 - 1) / 12
     else if p
@@ -327,6 +330,12 @@ class Morris.Line
       y2 = new Date(year+1, 0, 1).getTime();
       # calculate a decimal-year value
       year + (timestamp - y1) / (y2 - y1);
+    else if t1
+      (parseInt(t1[1], 10) * 3600) + (parseInt(t1[2], 10) * 60) + (parseInt(t1[3], 10));
+    else if t2
+      (parseInt(t2[1], 10) * 3600) + (parseInt(t2[2], 10) * 60) + (parseInt(t2[3], 10));
+    else if t3
+      (parseInt(t3[1], 10) * 3600) + (parseInt(t3[2], 10) * 60);
     else
       parseInt(date, 10)
 

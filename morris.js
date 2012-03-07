@@ -330,12 +330,15 @@
     };
 
     Line.prototype.parseYear = function(date) {
-      var day, m, month, n, o, p, s, timestamp, weeks, y1, y2, year;
+      var day, m, month, n, o, p, s, t1, t2, t3, timestamp, weeks, y1, y2, year;
       s = date.toString();
       m = s.match(/^(\d+) Q(\d)$/);
       n = s.match(/^(\d+)-(\d+)$/);
       o = s.match(/^(\d+)-(\d+)-(\d+)$/);
       p = s.match(/^(\d+) W(\d+)$/);
+      t1 = s.match(/^(\d+):(\d+):(\d+).(\d*)$/);
+      t2 = s.match(/^(\d+):(\d+):(\d+)$/);
+      t3 = s.match(/^(\d+):(\d+)$/);
       if (m) {
         return parseInt(m[1], 10) + (parseInt(m[2], 10) * 3 - 1) / 12;
       } else if (p) {
@@ -356,6 +359,12 @@
         y1 = new Date(year, 0, 1).getTime();
         y2 = new Date(year + 1, 0, 1).getTime();
         return year + (timestamp - y1) / (y2 - y1);
+      } else if (t1) {
+        return (parseInt(t1[1], 10) * 3600) + (parseInt(t1[2], 10) * 60) + (parseInt(t1[3], 10));
+      } else if (t2) {
+        return (parseInt(t2[1], 10) * 3600) + (parseInt(t2[2], 10) * 60) + (parseInt(t2[3], 10));
+      } else if (t3) {
+        return (parseInt(t3[1], 10) * 3600) + (parseInt(t3[2], 10) * 60);
       } else {
         return parseInt(date, 10);
       }
