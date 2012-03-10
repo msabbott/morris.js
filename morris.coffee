@@ -60,6 +60,7 @@ class Morris.Line
     hideHover: false
     parseTime: true
     units: ''
+    parseSeconds: false
 
   # Do any necessary pre-processing for a new dataset
   #
@@ -77,7 +78,9 @@ class Morris.Line
 
     # translate x labels into nominal dates
     # note: currently using decimal years to specify dates
-    if @options.parseTime
+    if @options.parseSeconds
+      @xvals = $.map @columnLabels, (x) => @parseTime x
+    else if @options.parseTime
       @xvals = $.map @columnLabels, (x) => @parseYear x
     else
       @xvals = [(@columnLabels.length-1)..0]
@@ -149,7 +152,7 @@ class Morris.Line
     prevLabelMargin = null
     xLabelMargin = 50 # make this an option?
     for i in [Math.ceil(@xmin)..Math.floor(@xmax)]
-      labelText = if @options.parseTime then i else @columnLabels[@columnLabels.length-i-1]
+      labelText = if @options.parseSeconds then @timeFormat(i) else if @options.parseTime then i else @columnLabels[@columnLabels.length-i-1]
       label = @r.text(transX(i), @options.marginTop + height + @options.marginBottom / 2, labelText)
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
@@ -311,9 +314,6 @@ class Morris.Line
     n = s.match /^(\d+)-(\d+)$/
     o = s.match /^(\d+)-(\d+)-(\d+)$/
     p = s.match /^(\d+) W(\d+)$/
-    t1 = s.match /^(\d+):(\d+):(\d+\.\d+)$/
-    t2 = s.match /^(\d+):(\d+):(\d+)$/
-    t3 = s.match /^(\d+):(\d+)$/
     if m
       parseInt(m[1], 10) + (parseInt(m[2], 10) * 3 - 1) / 12
     else if p
@@ -352,12 +352,35 @@ class Morris.Line
     else
       parseInt(date, 10)
 
+  parseTime: (time) ->
+    s = time.toString()
+    t1 = s.match /^(\d+):(\d+):(\d+\.\d+)$/
+    t2 = s.match /^(\d+):(\d+):(\d+)$/
+    t3 = s.match /^(\d+):(\d+)$/
+    if t1
+      (parseInt(t1[1], 10) * 3600) + (parseInt(t1[2], 10) * 60) + (parseFloat(t1[3], 10))
+    else if t2
+      (parseInt(t2[1], 10) * 3600) + (parseInt(t2[2], 10) * 60) + (parseInt(t2[3], 10))
+    else if t3
+      (parseInt(t3[1], 10) * 3600) + (parseInt(t3[2], 10) * 60)
+  
+
   # make long numbers prettier by inserting commas
   # eg: commas(1234567) -> '1,234,567'
   #
   commas: (num) ->
     ret = if num < 0 then "-" else ""
     ret + Math.abs(num).toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',')
+    
+  # Format numbers into hours:minutes:seconds
+  timeFormat: (t) ->
+    h = ~~(t / 3600);
+    t -= (h * 3600);
+    m = ~~(t / 60);
+    t -= (m * 60);
+    s = ~~(t / 1);
+    
+    (if 10 > h then '0' + h else h) + ':' + (if 10 > m then '0' + m else m) + ':' + (if 10 > s then '0' + s else s)
 
 window.Morris = Morris
 # vim: set et ts=2 sw=2 sts=2

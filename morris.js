@@ -48,7 +48,8 @@
       smooth: true,
       hideHover: false,
       parseTime: true,
-      units: ''
+      units: '',
+      parseSeconds: false
     };
 
     Line.prototype.precalc = function() {
@@ -69,7 +70,11 @@
           return d[ykey];
         }));
       }
-      if (this.options.parseTime) {
+      if (this.options.parseSeconds) {
+        this.xvals = $.map(this.columnLabels, function(x) {
+          return _this.parseTime(x);
+        });
+      } else if (this.options.parseTime) {
         this.xvals = $.map(this.columnLabels, function(x) {
           return _this.parseYear(x);
         });
@@ -137,7 +142,7 @@
       prevLabelMargin = null;
       xLabelMargin = 50;
       for (i = _ref = Math.ceil(this.xmin), _ref2 = Math.floor(this.xmax); _ref <= _ref2 ? i <= _ref2 : i >= _ref2; _ref <= _ref2 ? i++ : i--) {
-        labelText = this.options.parseTime ? i : this.columnLabels[this.columnLabels.length - i - 1];
+        labelText = this.options.parseSeconds ? this.timeFormat(i) : this.options.parseTime ? i : this.columnLabels[this.columnLabels.length - i - 1];
         label = this.r.text(transX(i), this.options.marginTop + height + this.options.marginBottom / 2, labelText).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
         labelBox = label.getBBox();
         if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
@@ -343,15 +348,12 @@
     };
 
     Line.prototype.parseYear = function(date) {
-      var day, m, month, n, o, p, s, t1, t2, t3, timestamp, weeks, y1, y2, year;
+      var day, m, month, n, o, p, s, timestamp, weeks, y1, y2, year;
       s = date.toString();
       m = s.match(/^(\d+) Q(\d)$/);
       n = s.match(/^(\d+)-(\d+)$/);
       o = s.match(/^(\d+)-(\d+)-(\d+)$/);
       p = s.match(/^(\d+) W(\d+)$/);
-      t1 = s.match(/^(\d+):(\d+):(\d+\.\d+)$/);
-      t2 = s.match(/^(\d+):(\d+):(\d+)$/);
-      t3 = s.match(/^(\d+):(\d+)$/);
       if (m) {
         return parseInt(m[1], 10) + (parseInt(m[2], 10) * 3 - 1) / 12;
       } else if (p) {
@@ -383,10 +385,35 @@
       }
     };
 
+    Line.prototype.parseTime = function(time) {
+      var s, t1, t2, t3;
+      s = time.toString();
+      t1 = s.match(/^(\d+):(\d+):(\d+\.\d+)$/);
+      t2 = s.match(/^(\d+):(\d+):(\d+)$/);
+      t3 = s.match(/^(\d+):(\d+)$/);
+      if (t1) {
+        return (parseInt(t1[1], 10) * 3600) + (parseInt(t1[2], 10) * 60) + (parseFloat(t1[3], 10));
+      } else if (t2) {
+        return (parseInt(t2[1], 10) * 3600) + (parseInt(t2[2], 10) * 60) + (parseInt(t2[3], 10));
+      } else if (t3) {
+        return (parseInt(t3[1], 10) * 3600) + (parseInt(t3[2], 10) * 60);
+      }
+    };
+
     Line.prototype.commas = function(num) {
       var ret;
       ret = num < 0 ? "-" : "";
       return ret + Math.abs(num).toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',');
+    };
+
+    Line.prototype.timeFormat = function(t) {
+      var h, m, s;
+      h = ~~(t / 3600);
+      t -= h * 3600;
+      m = ~~(t / 60);
+      t -= m * 60;
+      s = ~~(t / 1);
+      return (10 > h ? '0' + h : h) + ':' + (10 > m ? '0' + m : m) + ':' + (10 > s ? '0' + s : s);
     };
 
     return Line;
