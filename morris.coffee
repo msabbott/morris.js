@@ -79,7 +79,7 @@ class Morris.Line
     # translate x labels into nominal dates
     # note: currently using decimal years to specify dates
     if @options.parseSeconds
-      @xvals = $.map @columnLabels, (x) => @parseTime x
+      @xvals = $.map @columnLabels, (x) => @parseSeconds x
     else if @options.parseTime
       @xvals = $.map @columnLabels, (x) => @parseYear x
     else
@@ -152,7 +152,7 @@ class Morris.Line
     prevLabelMargin = null
     xLabelMargin = 50 # make this an option?
     for i in [Math.ceil(@xmin)..Math.floor(@xmax)]
-      labelText = if @options.parseSeconds then @timeFormat(i) else if @options.parseTime then i else @columnLabels[@columnLabels.length-i-1]
+      labelText = if @options.parseSeconds then @secondsFormat(i) else if @options.parseTime then i else @columnLabels[@columnLabels.length-i-1]
       label = @r.text(transX(i), @options.marginTop + height + @options.marginBottom / 2, labelText)
         .attr('font-size', @options.gridTextSize)
         .attr('fill', @options.gridTextColor)
@@ -352,7 +352,7 @@ class Morris.Line
     else
       parseInt(date, 10)
 
-  parseTime: (time) ->
+  parseSeconds: (time) ->
     s = time.toString()
     t1 = s.match /^(\d+):(\d+):(\d+\.\d+)$/
     t2 = s.match /^(\d+):(\d+):(\d+)$/
@@ -373,7 +373,7 @@ class Morris.Line
     ret + Math.abs(num).toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',')
     
   # Format numbers into hours:minutes:seconds
-  timeFormat: (t) ->
+  secondsFormat: (t) ->
     h = ~~(t / 3600);
     t -= (h * 3600);
     m = ~~(t / 60);
