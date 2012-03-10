@@ -1,0 +1,30 @@
+<!doctype html>
+<head>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="https://raw.github.com/DmitryBaranovskiy/raphael/300aa589f5a0ba7fce667cd62c7cdda0bd5ad904/raphael-min.js"></script>
+  <script src="../morris.js"></script>
+  <script src="lib/prettify.js"></script>
+  <script src="lib/example.js"></script>
+  <link rel="stylesheet" href="lib/example.css">
+  <link rel="stylesheet" href="lib/prettify.css">
+</head>
+<body>
+<h1>Formatting Time</h1>
+<div id="graph"></div>
+<pre id="code" class="prettyprint linenums">
+var time_data = [
+  {"elapsed": "00:00:15", "value": 9},
+  {"elapsed": "00:00:17.56", "value": 13},
+  {"elapsed": "00:01:20", "value": 10},
+  {"elapsed": "00:00:10", "value": 20},
+  {"elapsed": "00:01", "value": 15}
+];
+Morris.Line({
+  element: 'graph',
+  data: time_data,
+  xkey: 'elapsed',
+  ykeys: ['value'],
+  labels: ['value']
+});
+</pre>
+</body>
