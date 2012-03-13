@@ -72,7 +72,7 @@
       }
       if (this.options.parseSeconds) {
         this.xvals = $.map(this.columnLabels, function(x) {
-          return _this.parseTime(x);
+          return _this.parseSeconds(x);
         });
       } else if (this.options.parseTime) {
         this.xvals = $.map(this.columnLabels, function(x) {
@@ -110,7 +110,7 @@
     };
 
     Line.prototype.redraw = function() {
-      var c, circle, columns, coords, dx, dy, firstY, height, hideHover, hilight, hover, hoverHeight, hoverMargins, hoverSet, i, label, labelBox, labelText, lastY, left, lineY, maxYLabelWidth, path, pointGrow, pointShrink, prevHilight, prevLabelMargin, s, seriesCoords, seriesPoints, touchHandler, transX, transY, updateHilight, updateHover, v, width, x, xLabel, xLabelMargin, y, yInterval, yLabel, yLabels, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7,
+      var c, circle, columns, coords, dx, dy, firstY, height, hideHover, hilight, hover, hoverHeight, hoverMargins, hoverSet, i, label, labelBox, labelText, lastY, left, lineY, maxYLabelWidth, next_x, path, pointGrow, pointShrink, prevHilight, prevLabelMargin, s, seriesCoords, seriesPoints, touchHandler, transX, transY, updateHilight, updateHover, v, width, x, xLabel, xLabelMargin, xstep, y, yInterval, yLabel, yLabels, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7,
         _this = this;
       this.el.empty();
       this.r = new Raphael(this.el[0]);
@@ -141,14 +141,19 @@
       }
       prevLabelMargin = null;
       xLabelMargin = 50;
+      xstep = width / this.xvals.length;
+      next_x = null;
       for (i = _ref = Math.ceil(this.xmin), _ref2 = Math.floor(this.xmax); _ref <= _ref2 ? i <= _ref2 : i >= _ref2; _ref <= _ref2 ? i++ : i--) {
-        labelText = this.options.parseSeconds ? this.timeFormat(i) : this.options.parseTime ? i : this.columnLabels[this.columnLabels.length - i - 1];
-        label = this.r.text(transX(i), this.options.marginTop + height + this.options.marginBottom / 2, labelText).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
-        labelBox = label.getBBox();
-        if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
-          prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
-        } else {
-          label.remove();
+        if (xstep < 1 || null === next_x || i >= next_x) {
+          labelText = this.options.parseSeconds ? this.secondsFormat(i) : this.options.parseTime ? i : this.columnLabels[this.columnLabels.length - i - 1];
+          label = this.r.text(transX(i), this.options.marginTop + height + this.options.marginBottom / 2, labelText).attr('font-size', this.options.gridTextSize).attr('fill', this.options.gridTextColor);
+          labelBox = label.getBBox();
+          next_x = (labelBox.x + labelBox.width + xLabelMargin) * xstep;
+          if (prevLabelMargin === null || prevLabelMargin <= labelBox.x) {
+            prevLabelMargin = labelBox.x + labelBox.width + xLabelMargin;
+          } else {
+            label.remove();
+          }
         }
       }
       columns = (function() {
@@ -385,7 +390,7 @@
       }
     };
 
-    Line.prototype.parseTime = function(time) {
+    Line.prototype.parseSeconds = function(time) {
       var s, t1, t2, t3;
       s = time.toString();
       t1 = s.match(/^(\d+):(\d+):(\d+\.\d+)$/);
@@ -406,7 +411,7 @@
       return ret + Math.abs(num).toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',');
     };
 
-    Line.prototype.timeFormat = function(t) {
+    Line.prototype.secondsFormat = function(t) {
       var h, m, s;
       h = ~~(t / 3600);
       t -= h * 3600;
